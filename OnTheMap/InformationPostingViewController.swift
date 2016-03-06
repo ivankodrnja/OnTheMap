@@ -137,7 +137,7 @@ class InformationPostingViewController: UIViewController {
         
         let geoCoder = CLGeocoder()
         
-        geoCoder.geocodeAddressString(self.locationTextField.text) { (placemarks: [AnyObject]!, error: NSError!) in
+        geoCoder.geocodeAddressString(self.locationTextField.text!) { (placemarks, error) -> Void in
             
             if error != nil {
                 self.view.alpha = 1.0
@@ -158,9 +158,9 @@ class InformationPostingViewController: UIViewController {
                 self.view.alpha = 1.0
                 
                 // create coordinates and annotation
-                let placemark = placemarks[0] as! CLPlacemark
+                let placemark = placemarks![0] 
                 let location = placemark.location
-                self.coords = location.coordinate
+                self.coords = location!.coordinate
                 
                 
                 self.latitude = self.coords!.latitude
@@ -168,7 +168,7 @@ class InformationPostingViewController: UIViewController {
                 
                 let coordinate = CLLocationCoordinate2D(latitude: self.latitude!, longitude: self.longitude!)
                 
-                var annotation = MKPointAnnotation()
+                let annotation = MKPointAnnotation()
                 annotation.coordinate = coordinate
                 
                 // construct the visible area of the map based on the lat/lon
@@ -193,11 +193,11 @@ class InformationPostingViewController: UIViewController {
         self.findOnTheMapButton.enabled = false
         
         // check if the link text field is empty
-        if self.linkTextField.text.isEmpty {
+        if self.linkTextField.text!.isEmpty {
             self.displayError("Must Enter a Link.")
         } else {
             // check if the entered url is valid
-            if self.validateUrl(self.linkTextField.text) {
+            if self.validateUrl(self.linkTextField.text!) {
             
                 // prevent the user for submitting twice
                 self.submitButton.enabled = false
@@ -219,7 +219,7 @@ class InformationPostingViewController: UIViewController {
                             tempLastName = member.lastName!
                         }
                         // post student location
-                        ParseClient.sharedInstance().postStudentLocation(tempKey!, firstName: tempFirstName!, lastName: tempLastName!, mapString: self.locationTextField.text, mediaURL: self.linkTextField.text, latitude: self.latitude!, longitude: self.longitude!)  { (success, error) in
+                        ParseClient.sharedInstance().postStudentLocation(tempKey!, firstName: tempFirstName!, lastName: tempLastName!, mapString: self.locationTextField.text!, mediaURL: self.linkTextField.text!, latitude: self.latitude!, longitude: self.longitude!)  { (success, error) in
                             // student location has been posted
                             if success {
                                 dispatch_async(dispatch_get_main_queue(), {
@@ -287,7 +287,7 @@ class InformationPostingViewController: UIViewController {
     // REGEX for validating entered url
     func validateUrl(url: String) -> Bool {
         let pattern = "^(https?:\\/\\/)([a-zA-Z0-9_\\-~]+\\.)+[a-zA-Z0-9_\\-~\\/\\.]+$"
-        if let match = url.rangeOfString(pattern, options: .RegularExpressionSearch){
+        if let _ = url.rangeOfString(pattern, options: .RegularExpressionSearch){
             return true
         }
         return false

@@ -22,8 +22,8 @@ class ListViewController: UIViewController, UITableViewDelegate, UITableViewData
         self.parentViewController?.navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Logout", style: .Plain, target: self, action: "logoutButtonTouchUp")
         
         
-        var rightRefreshBarButtonItem: UIBarButtonItem = UIBarButtonItem(barButtonSystemItem: UIBarButtonSystemItem.Refresh, target: self, action: "refreshData")
-        var rightInformationPostingButtonItem: UIBarButtonItem = UIBarButtonItem(image: UIImage(named: "Pin Icon"), style: UIBarButtonItemStyle.Plain, target: self, action: "postInformation")
+        let rightRefreshBarButtonItem: UIBarButtonItem = UIBarButtonItem(barButtonSystemItem: UIBarButtonSystemItem.Refresh, target: self, action: "refreshData")
+        let rightInformationPostingButtonItem: UIBarButtonItem = UIBarButtonItem(image: UIImage(named: "Pin Icon"), style: UIBarButtonItemStyle.Plain, target: self, action: "postInformation")
         
         self.parentViewController?.navigationItem.setRightBarButtonItems([rightRefreshBarButtonItem, rightInformationPostingButtonItem], animated: true)
         
@@ -63,7 +63,7 @@ class ListViewController: UIViewController, UITableViewDelegate, UITableViewData
                 
                 self.dismissViewControllerAnimated(true, completion: nil)
             } else {
-                println(error)
+                print(error)
             }
         }
         
@@ -120,7 +120,9 @@ class ListViewController: UIViewController, UITableViewDelegate, UITableViewData
         /* Get cell type */
         let cellReuseIdentifier = "StudentlistTableViewCell"
         let student = ParseClient.sharedInstance().studentsDict[indexPath.row]
-        var cell = tableView.dequeueReusableCellWithIdentifier(cellReuseIdentifier) as! UITableViewCell
+        
+        
+        let cell = tableView.dequeueReusableCellWithIdentifier(cellReuseIdentifier)! as UITableViewCell
         
         /* Set cell defaults */
         cell.textLabel!.text = student.firstName! + " " + student.lastName!
@@ -142,7 +144,7 @@ class ListViewController: UIViewController, UITableViewDelegate, UITableViewData
     }
     
     func tableView(tableView: UITableView, heightForRowAtIndexPath indexPath: NSIndexPath) -> CGFloat {
-        return 100
+        return 60
     }
     
 }

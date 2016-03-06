@@ -117,20 +117,20 @@ class LoginViewController: UIViewController {
     @IBAction func loginButtonTouch(sender: AnyObject) {
         
         // check if username (email) and aswword fields are entered
-        if usernameTextField.text.isEmpty {
+        if usernameTextField.text!.isEmpty {
             self.showAlertView("Email is empty!")
-        } else if passwordTextField.text.isEmpty {
+        } else if passwordTextField.text!.isEmpty {
             self.showAlertView("Password is empty!")
         } else {
             self.activityIndicator.startAnimating()
         
-            UdacityClient.sharedInstance().authenticateUser(usernameTextField.text, password: passwordTextField.text) { (success, errorString) in
+            UdacityClient.sharedInstance().authenticateUser(usernameTextField.text!, password: passwordTextField.text!) { (success, error) in
                 
                 
                 if success {
                     self.completeLogin()
                 } else {
-                    self.displayError(errorString)
+                    self.displayError(error?.localizedDescription)
                 }
             }
             
@@ -165,10 +165,10 @@ class LoginViewController: UIViewController {
         self.view.backgroundColor = UIColor.clearColor()
         let colorTop = UIColor(red: 0.969, green: 0.588, blue: 0.231, alpha: 1.0).CGColor
         let colorBottom = UIColor(red: 0.988, green: 0.435, blue: 0.176, alpha: 1.0).CGColor
-        var backgroundGradient = CAGradientLayer()
-        backgroundGradient!.colors = [colorTop, colorBottom]
-        backgroundGradient!.locations = [0.0, 1.0]
-        backgroundGradient!.frame = view.frame
+        let backgroundGradient = CAGradientLayer()
+        backgroundGradient.colors = [colorTop, colorBottom]
+        backgroundGradient.locations = [0.0, 1.0]
+        backgroundGradient.frame = view.frame
         self.view.layer.insertSublayer(backgroundGradient, atIndex: 0)
         
         /* Configure header text label */

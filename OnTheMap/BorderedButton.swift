@@ -8,29 +8,46 @@
 
 import UIKit
 
-let borderedButtonHeight : CGFloat = 44.0
-let borderedButtonCornerRadius : CGFloat = 4.0
-let padBorderedButtonExtraPadding : CGFloat = 20.0
-let phoneBorderedButtonExtraPadding : CGFloat = 14.0
+// MARK: - BorderedButton: Button
 
 class BorderedButton: UIButton {
     
-    // MARK: - Properties
+    // MARK: Properties
+    
+    /* Constants for styling and configuration */
+    let darkerBlue = UIColor(red: 0.0, green: 0.298, blue: 0.686, alpha:1.0)
+    let lighterBlue = UIColor(red: 0.0, green:0.502, blue:0.839, alpha: 1.0)
+    let titleLabelFontSize : CGFloat = 17.0
+    let borderedButtonHeight : CGFloat = 44.0
+    let borderedButtonCornerRadius : CGFloat = 4.0
+    let phoneBorderedButtonExtraPadding : CGFloat = 14.0
     
     var backingColor : UIColor? = nil
     var highlightedBackingColor : UIColor? = nil
     
-    // MARK: - Constructors
+    // MARK: Initialization
     
     required init(coder aDecoder: NSCoder) {
-        super.init(coder: aDecoder)
+        super.init(coder: aDecoder)!
+        self.themeBorderedButton()
     }
     
     override init(frame: CGRect) {
         super.init(frame: frame)
+        self.themeBorderedButton()
     }
     
-    // MARK: - Setters
+    func themeBorderedButton() -> Void {
+        self.layer.masksToBounds = true
+        self.layer.cornerRadius = borderedButtonCornerRadius
+        self.highlightedBackingColor = darkerBlue
+        self.backingColor = lighterBlue
+        self.backgroundColor = lighterBlue
+        self.setTitleColor(UIColor.whiteColor(), forState: .Normal)
+        self.titleLabel?.font = UIFont(name: "AvenirNext-Medium", size: titleLabelFontSize)
+    }
+    
+    // MARK: Setters
     
     private func setBackingColor(backingColor : UIColor) -> Void {
         if (self.backingColor != nil) {
@@ -44,14 +61,14 @@ class BorderedButton: UIButton {
         self.backingColor = highlightedBackingColor
     }
     
-    // MARK: - Tracking
+    // MARK: Tracking
     
-    override func beginTrackingWithTouch(touch: UITouch, withEvent: UIEvent) -> Bool {
+    override func beginTrackingWithTouch(touch: UITouch, withEvent: UIEvent?) -> Bool {
         self.backgroundColor = self.highlightedBackingColor
         return true
     }
     
-    override func endTrackingWithTouch(touch: UITouch, withEvent: UIEvent) {
+    override func endTrackingWithTouch(touch: UITouch?, withEvent event: UIEvent?) {
         self.backgroundColor = self.backingColor
     }
     
@@ -59,14 +76,13 @@ class BorderedButton: UIButton {
         self.backgroundColor = self.backingColor
     }
     
-    // MARK: - Layout
+    // MARK: Layout
     
     override func sizeThatFits(size: CGSize) -> CGSize {
-        let userInterfaceIdiom = UIDevice.currentDevice().userInterfaceIdiom
-        let extraButtonPadding : CGFloat = 14.0
+        let extraButtonPadding : CGFloat = phoneBorderedButtonExtraPadding
         var sizeThatFits = CGSizeZero
         sizeThatFits.width = super.sizeThatFits(size).width + extraButtonPadding
-        sizeThatFits.height = 44.0
+        sizeThatFits.height = borderedButtonHeight
         return sizeThatFits
         
     }

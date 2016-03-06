@@ -28,31 +28,57 @@ extension ParseClient {
         request.addValue(ParseClient.Constants.APIKey, forHTTPHeaderField: "X-Parse-REST-API-Key")
         
         /* 4. Make the request */
-        let task = session.dataTaskWithRequest(request) { data, response, downloadError in
+        let task = session.dataTaskWithRequest(request) { data, response, error in
             
-            if let error = downloadError {
-             
-                completionHandler(result: nil, error: error)
-            } else {
-                /* 5. Parse the data */
-                var parsingError: NSError? = nil
-                let parsedResult = NSJSONSerialization.JSONObjectWithData(data, options: NSJSONReadingOptions.AllowFragments, error: &parsingError) as! NSDictionary
+            /* GUARD: Was there an error? */
+            guard (error == nil) else {
                 
-                /* 6. Use the data! */
-                if let error = parsingError {
-                    println("Parsing Error: \(error)")
-                } else {
-                    if let results = parsedResult.valueForKey(ParseClient.JSONResponseKeys.Results) as? [[String : AnyObject]] {
-                        
-                        var students = StudentInformation.studentsFromResults(results)
-                        
-                        completionHandler(result: students, error: nil)
-                        
-                    } else {
-                        completionHandler(result: nil, error: NSError(domain: "Results from Parse", code: 0, userInfo: [NSLocalizedDescriptionKey: "Download (server) error occured. Please retry."]))
-                    }
-                }
+                completionHandler(result: nil, error: error)
+                print("There was an error with your request: \(error)")
+                return
             }
+            
+            /* GUARD: Did we get a successful 2XX response? */
+            guard let statusCode = (response as? NSHTTPURLResponse)?.statusCode where statusCode >= 200 && statusCode <= 299 else {
+                if let response = response as? NSHTTPURLResponse {
+                    print("Your request returned an invalid response! Status code: \(response.statusCode)!")
+                } else if let response = response {
+                    print("Your request returned an invalid response! Response: \(response)!")
+                } else {
+                    print("Your request returned an invalid response!")
+                }
+                return
+            }
+            
+            /* GUARD: Was there any data returned? */
+            guard let data = data else {
+                print("No data was returned by the request!")
+                return
+            }
+            
+
+            /* 5. Parse the data */
+            let parsedResult: AnyObject!
+            do {
+                parsedResult = try NSJSONSerialization.JSONObjectWithData(data, options: NSJSONReadingOptions.AllowFragments) as! NSDictionary
+            } catch {
+                parsedResult = nil
+                print("Could not parse the data as JSON: '\(data)'")
+                return
+            }
+            
+            /* 6. Use the data! */
+            if let results = parsedResult.valueForKey(ParseClient.JSONResponseKeys.Results) as? [[String : AnyObject]] {
+                
+                let students = StudentInformation.studentsFromResults(results)
+                
+                completionHandler(result: students, error: nil)
+                
+            } else {
+                completionHandler(result: nil, error: NSError(domain: "Results from Parse", code: 0, userInfo: [NSLocalizedDescriptionKey: "Download (server) error occured. Please retry."]))
+            }
+            
+            
         }
         /* 7. Start the request */
         task.resume()
@@ -86,7 +112,7 @@ extension ParseClient {
                 let mediaURL = dictionary.mediaUrl! as String
                 
                 // Here we create the annotation and set its coordiate, title, and subtitle properties
-                var annotation = MKPointAnnotation()
+                let annotation = MKPointAnnotation()
                 annotation.coordinate = coordinate
                 annotation.title = "\(first) \(last)"
                 annotation.subtitle = mediaURL
@@ -120,29 +146,54 @@ extension ParseClient {
 
         
         /* 4. Make the request */
-        let task = session.dataTaskWithRequest(request) { data, response, downloadError in
+        let task = session.dataTaskWithRequest(request) { data, response, error in
             
-            if let error = downloadError {
+            /* GUARD: Was there an error? */
+            guard (error == nil) else {
                 
                 completionHandler(success: false, error: error)
-            } else {
-                /* 5. Parse the data */
-                
-                var parsingError: NSError? = nil
-                let parsedResult = NSJSONSerialization.JSONObjectWithData(data, options: NSJSONReadingOptions.AllowFragments, error: &parsingError) as! NSDictionary
-                
-                /* 6. Use the data! */
-                if let error = parsingError {
-                    println("Parsing Error: \(error)")
-                } else {
-                    if let objectID = parsedResult.valueForKey(ParseClient.JSONResponseKeys.ObjID) as? String {
-                        
-                        completionHandler(success: true, error: nil)
-                    } else {
-                        completionHandler(success: false, error: NSError(domain: "PostStudentLocation", code: 0, userInfo: [NSLocalizedDescriptionKey: "Post request failed. Try again later."]))
-                    }
-                }
+                print("There was an error with your request: \(error)")
+                return
             }
+            
+            /* GUARD: Did we get a successful 2XX response? */
+            guard let statusCode = (response as? NSHTTPURLResponse)?.statusCode where statusCode >= 200 && statusCode <= 299 else {
+                if let response = response as? NSHTTPURLResponse {
+                    print("Your request returned an invalid response! Status code: \(response.statusCode)!")
+                } else if let response = response {
+                    print("Your request returned an invalid response! Response: \(response)!")
+                } else {
+                    print("Your request returned an invalid response!")
+                }
+                return
+            }
+            
+            /* GUARD: Was there any data returned? */
+            guard let data = data else {
+                print("No data was returned by the request!")
+                return
+            }
+
+            
+            /* 5. Parse the data */
+            let parsedResult: AnyObject!
+            do {
+                parsedResult = try NSJSONSerialization.JSONObjectWithData(data, options: NSJSONReadingOptions.AllowFragments) as! NSDictionary
+            } catch {
+                parsedResult = nil
+                print("Could not parse the data as JSON: '\(data)'")
+                return
+            }
+            
+            /* 6. Use the data! */
+            if let _ = parsedResult.valueForKey(ParseClient.JSONResponseKeys.ObjID) as? String {
+                
+                completionHandler(success: true, error: nil)
+            } else {
+                completionHandler(success: false, error: NSError(domain: "PostStudentLocation", code: 0, userInfo: [NSLocalizedDescriptionKey: "Post request failed. Try again later."]))
+            }
+            
+            
         }
         /* 7. Start the request */
         task.resume()
