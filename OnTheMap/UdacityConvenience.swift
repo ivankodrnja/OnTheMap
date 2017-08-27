@@ -178,7 +178,9 @@ extension UdacityClient {
             
             /* 6. Use the data! */
             if let _ = parsedResult[UdacityClient.JSONResponseKeys.Session]?.value(forKey: UdacityClient.JSONResponseKeys.Id) as? String {
-                completionHandlerForLogout(true, nil)
+                DispatchQueue.main.async {
+                    completionHandlerForLogout(true, nil)
+                }
             } else {
                 completionHandlerForLogout(false, NSError(domain: "Logout", code: 0, userInfo: [NSLocalizedDescriptionKey: "Couldn't logout."]))
                 }

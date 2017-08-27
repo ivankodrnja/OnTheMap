@@ -99,21 +99,46 @@ extension ParseClient {
                 
                 // Notice that the float values are being used to create CLLocationDegree values.
                 // This is a version of the Double type.
-                let lat = CLLocationDegrees(dictionary.latitude! as Double)
-                let long = CLLocationDegrees(dictionary.longitude! as Double)
+                //let lat = CLLocationDegrees(dictionary.latitude! as Double)
+                var lat: CLLocationDegrees?
+                var long: CLLocationDegrees?
+                var coordinate: CLLocationCoordinate2D?
+                
+                if let latitude = dictionary.latitude, let longitude = dictionary.longitude {
+                    lat = CLLocationDegrees(latitude)
+                    long = CLLocationDegrees(longitude)
+                    
+                    // The lat and long are used to create a CLLocationCoordinates2D instance.
+                    coordinate = CLLocationCoordinate2D(latitude: lat!, longitude: long!)
+                }
+
+                
+                //let long = CLLocationDegrees(dictionary.longitude! as Double)
                 
                 // The lat and long are used to create a CLLocationCoordinates2D instance.
-                let coordinate = CLLocationCoordinate2D(latitude: lat, longitude: long)
+                //let coordinate = CLLocationCoordinate2D(latitude: lat!, longitude: long!)
                 
-                let first = dictionary.firstName! as String
-                let last = dictionary.lastName! as String
-                let mediaURL = dictionary.mediaUrl! as String
+                
+                
+                //let first = dictionary.firstName! as String
+                //let last = dictionary.lastName! as String
+                //let mediaURL = dictionary.mediaUrl! as String
                 
                 // Here we create the annotation and set its coordiate, title, and subtitle properties
                 let annotation = MKPointAnnotation()
-                annotation.coordinate = coordinate
-                annotation.title = "\(first) \(last)"
-                annotation.subtitle = mediaURL
+                
+                if let coordinate = coordinate {
+                    annotation.coordinate = coordinate
+                }
+                
+                if let firstName = dictionary.firstName, let lastName = dictionary.lastName {
+                    annotation.title = "\(firstName) \(lastName)"
+                }
+
+                if let mediaUrl = dictionary.mediaUrl {
+                    annotation.subtitle = mediaUrl
+                }
+                
                 
                 // Finally we place the annotation in an array of annotations.
                 annotations.append(annotation)
