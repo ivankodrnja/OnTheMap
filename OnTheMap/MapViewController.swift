@@ -22,19 +22,19 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
-        self.parentViewController?.navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Logout", style: .Plain, target: self, action: "logoutButtonTouchUp")
+        self.parent?.navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Logout", style: .plain, target: self, action: #selector(MapViewController.logoutButtonTouchUp))
         
-        let rightRefreshBarButtonItem: UIBarButtonItem = UIBarButtonItem(barButtonSystemItem: UIBarButtonSystemItem.Refresh, target: self, action: "getStudentLocations")
-        let rightInformationPostingButtonItem: UIBarButtonItem = UIBarButtonItem(image: UIImage(named: "Pin Icon"), style: UIBarButtonItemStyle.Plain, target: self, action: "postInformation")
+        let rightRefreshBarButtonItem: UIBarButtonItem = UIBarButtonItem(barButtonSystemItem: UIBarButtonSystemItem.refresh, target: self, action: #selector(MapViewController.getStudentLocations))
+        let rightInformationPostingButtonItem: UIBarButtonItem = UIBarButtonItem(image: UIImage(named: "Pin Icon"), style: UIBarButtonItemStyle.plain, target: self, action: #selector(MapViewController.postInformation))
         
-        self.parentViewController?.navigationItem.setRightBarButtonItems([rightRefreshBarButtonItem, rightInformationPostingButtonItem], animated: true)
+        self.parent?.navigationItem.setRightBarButtonItems([rightRefreshBarButtonItem, rightInformationPostingButtonItem], animated: true)
         
         activityIndicator.hidesWhenStopped = true
         activityIndicator.stopAnimating()
         
     }
     
-    override func viewWillAppear(animated: Bool) {
+    override func viewWillAppear(_ animated: Bool) {
         
         self.getStudentLocations()
         
@@ -45,8 +45,8 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         // Dispose of any resources that can be recreated.
     }
     
-    func displayError(errorString: String?) {
-        dispatch_async(dispatch_get_main_queue(), {
+    func displayError(_ errorString: String?) {
+        DispatchQueue.main.async(execute: {
             self.activityIndicator.stopAnimating()
             
             if let errorString = errorString {
@@ -65,7 +65,7 @@ class MapViewController: UIViewController, MKMapViewDelegate {
             if success{
                 self.activityIndicator.stopAnimating()
                 
-                self.dismissViewControllerAnimated(true, completion: nil)
+                self.dismiss(animated: true, completion: nil)
             } else {
                 print(error)
             }
@@ -88,7 +88,7 @@ class MapViewController: UIViewController, MKMapViewDelegate {
                     // proceed if we successfully created annotations
                     if error == nil {
                         
-                        dispatch_async(dispatch_get_main_queue(), {
+                        DispatchQueue.main.async(execute: {
                             self.activityIndicator.stopAnimating()
                             
                             self.mapView.addAnnotations(result!)
@@ -107,24 +107,24 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     }
     
     func postInformation(){
-        let controller = self.storyboard?.instantiateViewControllerWithIdentifier("InformationPostingViewController") as! InformationPostingViewController 
-        self.presentViewController(controller, animated: true, completion: nil)
+        let controller = self.storyboard?.instantiateViewController(withIdentifier: "InformationPostingViewController") as! InformationPostingViewController 
+        self.present(controller, animated: true, completion: nil)
         
     }
     
     // MARK: - helpers
     
-    func showAlertView(errorMessage: String?) {
+    func showAlertView(_ errorMessage: String?) {
         
-        let alertController = UIAlertController(title: nil, message: errorMessage!, preferredStyle: .Alert)
+        let alertController = UIAlertController(title: nil, message: errorMessage!, preferredStyle: .alert)
         
-        let cancelAction = UIAlertAction(title: "Dismiss", style: .Cancel) {(action) in
+        let cancelAction = UIAlertAction(title: "Dismiss", style: .cancel) {(action) in
             
             
         }
         alertController.addAction(cancelAction)
         
-        self.presentViewController(alertController, animated: true){
+        self.present(alertController, animated: true){
             
         }
         
@@ -135,19 +135,19 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     
     // MARK: - Map delegate methods
     
-    func mapView(mapView: MKMapView, viewForAnnotation annotation: MKAnnotation) -> MKAnnotationView? {
+    func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
         
 
         
         let reuseId = "pin"
         
-        var pinView = mapView.dequeueReusableAnnotationViewWithIdentifier(reuseId) as? MKPinAnnotationView
+        var pinView = mapView.dequeueReusableAnnotationView(withIdentifier: reuseId) as? MKPinAnnotationView
         
         if pinView == nil {
             pinView = MKPinAnnotationView(annotation: annotation, reuseIdentifier: reuseId)
             pinView!.canShowCallout = true
-            pinView!.pinColor = .Red
-            pinView!.rightCalloutAccessoryView = UIButton(type: .DetailDisclosure)
+            pinView!.pinColor = .red
+            pinView!.rightCalloutAccessoryView = UIButton(type: .detailDisclosure)
         } else {
             pinView!.annotation = annotation
         }
@@ -156,11 +156,11 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     }
     
     // This delegate method opens the system browser to the URL specified in the annotationViews subtitle property.
-    func mapView(mapView: MKMapView, annotationView: MKAnnotationView, calloutAccessoryControlTapped control: UIControl) {
+    func mapView(_ mapView: MKMapView, annotationView: MKAnnotationView, calloutAccessoryControlTapped control: UIControl) {
         
         if control == annotationView.rightCalloutAccessoryView {
-            let app = UIApplication.sharedApplication()
-            app.openURL(NSURL(string: annotationView.annotation!.subtitle!!)!)
+            let app = UIApplication.shared
+            app.openURL(URL(string: annotationView.annotation!.subtitle!!)!)
         }
     }
 

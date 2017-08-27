@@ -18,7 +18,7 @@ class LoginViewController: UIViewController {
     @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
     
     
-    var session: NSURLSession!
+    var session: URLSession!
     var tapRecognizer: UITapGestureRecognizer? = nil
     var keyboardAdjusted = false
     var lastKeyboardOffset : CGFloat = 0.0
@@ -30,13 +30,13 @@ class LoginViewController: UIViewController {
         // Do any additional setup after loading the view, typically from a nib.
         
         /* Get the shared URL session */
-        session = NSURLSession.sharedSession()
+        session = URLSession.shared
         
         /* Configure the UI*/
         self.configureUI()
     }
     
-    override func viewWillAppear(animated: Bool) {
+    override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
         self.addKeyboardDismissRecognizer()
@@ -46,7 +46,7 @@ class LoginViewController: UIViewController {
         activityIndicator.stopAnimating()
     }
     
-    override func viewWillDisappear(animated: Bool) {
+    override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         
         self.removeKeyboardDismissRecognizer()
@@ -70,20 +70,20 @@ class LoginViewController: UIViewController {
         self.view.removeGestureRecognizer(tapRecognizer!)
     }
     
-    func handleSingleTap(recognizer: UITapGestureRecognizer) {
+    func handleSingleTap(_ recognizer: UITapGestureRecognizer) {
         self.view.endEditing(true)
     }
     
     func subscribeToKeyboardNotifications() {
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: "keyboardWillShow:", name: UIKeyboardWillShowNotification, object: nil)
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: "keyboardWillHide:", name: UIKeyboardWillHideNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(LoginViewController.keyboardWillShow(_:)), name: NSNotification.Name.UIKeyboardWillShow, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(LoginViewController.keyboardWillHide(_:)), name: NSNotification.Name.UIKeyboardWillHide, object: nil)
     }
     
     func unsubscribeToKeyboardNotifications() {
-        NSNotificationCenter.defaultCenter().removeObserver(self, name: UIKeyboardWillShowNotification, object: nil)
+        NotificationCenter.default.removeObserver(self, name: NSNotification.Name.UIKeyboardWillShow, object: nil)
     }
     
-    func keyboardWillShow(notification: NSNotification) {
+    func keyboardWillShow(_ notification: Notification) {
         
         if keyboardAdjusted == false {
             lastKeyboardOffset = getKeyboardHeight(notification) / 2
@@ -92,7 +92,7 @@ class LoginViewController: UIViewController {
         }
     }
     
-    func keyboardWillHide(notification: NSNotification) {
+    func keyboardWillHide(_ notification: Notification) {
         
         if keyboardAdjusted == true {
             self.view.superview?.frame.origin.y += lastKeyboardOffset
@@ -100,21 +100,21 @@ class LoginViewController: UIViewController {
         }
     }
     
-    func getKeyboardHeight(notification: NSNotification) -> CGFloat {
+    func getKeyboardHeight(_ notification: Notification) -> CGFloat {
         let userInfo = notification.userInfo
         let keyboardSize = userInfo![UIKeyboardFrameEndUserInfoKey] as! NSValue // of CGRect
-        return keyboardSize.CGRectValue().height
+        return keyboardSize.cgRectValue.height
     }
     
     
     // MARK: - Actions
     
-    @IBAction func signupAction(sender: AnyObject) {
-        UIApplication.sharedApplication().openURL(NSURL(string: UdacityClient.Constants.signupUrl)!)
+    @IBAction func signupAction(_ sender: AnyObject) {
+        UIApplication.shared.openURL(URL(string: UdacityClient.Constants.signupUrl)!)
     }
     
     
-    @IBAction func loginButtonTouch(sender: AnyObject) {
+    @IBAction func loginButtonTouch(_ sender: AnyObject) {
         
         // check if username (email) and aswword fields are entered
         if usernameTextField.text!.isEmpty {
@@ -139,17 +139,17 @@ class LoginViewController: UIViewController {
     }
     
     func completeLogin() {
-        dispatch_async(dispatch_get_main_queue(), {
+        DispatchQueue.main.async(execute: {
             self.activityIndicator.stopAnimating()
             
-            let controller = self.storyboard!.instantiateViewControllerWithIdentifier("OnTheMapNavigationController") as! UINavigationController
-            self.presentViewController(controller, animated: true, completion: nil)
+            let controller = self.storyboard!.instantiateViewController(withIdentifier: "OnTheMapNavigationController") as! UINavigationController
+            self.present(controller, animated: true, completion: nil)
         })
     }
     
     
-    func displayError(errorString: String?) {
-        dispatch_async(dispatch_get_main_queue(), {
+    func displayError(_ errorString: String?) {
+        DispatchQueue.main.async(execute: {
             self.activityIndicator.stopAnimating()
             if let errorString = errorString {
                 self.showAlertView(errorString)
@@ -162,74 +162,74 @@ class LoginViewController: UIViewController {
     func configureUI() {
         
         /* Configure background gradient */
-        self.view.backgroundColor = UIColor.clearColor()
-        let colorTop = UIColor(red: 0.969, green: 0.588, blue: 0.231, alpha: 1.0).CGColor
-        let colorBottom = UIColor(red: 0.988, green: 0.435, blue: 0.176, alpha: 1.0).CGColor
+        self.view.backgroundColor = UIColor.clear
+        let colorTop = UIColor(red: 0.969, green: 0.588, blue: 0.231, alpha: 1.0).cgColor
+        let colorBottom = UIColor(red: 0.988, green: 0.435, blue: 0.176, alpha: 1.0).cgColor
         let backgroundGradient = CAGradientLayer()
         backgroundGradient.colors = [colorTop, colorBottom]
         backgroundGradient.locations = [0.0, 1.0]
         backgroundGradient.frame = view.frame
-        self.view.layer.insertSublayer(backgroundGradient, atIndex: 0)
+        self.view.layer.insertSublayer(backgroundGradient, at: 0)
         
         /* Configure header text label */
         headerTextLabel.font = UIFont(name: "Roboto-Medium", size: 24.0)
-        headerTextLabel.textColor = UIColor.whiteColor()
+        headerTextLabel.textColor = UIColor.white
         
         /* Configure email textfield */
-        let emailTextFieldPaddingViewFrame = CGRectMake(0.0, 0.0, 13.0, 0.0);
+        let emailTextFieldPaddingViewFrame = CGRect(x: 0.0, y: 0.0, width: 13.0, height: 0.0);
         let emailTextFieldPaddingView = UIView(frame: emailTextFieldPaddingViewFrame)
         usernameTextField.leftView = emailTextFieldPaddingView
-        usernameTextField.leftViewMode = .Always
+        usernameTextField.leftViewMode = .always
         usernameTextField.font = UIFont(name: "Roboto-Medium", size: 17.0)
         usernameTextField.backgroundColor = UIColor(red: 0.980, green: 0.769, blue: 0.608, alpha:1.0)
         usernameTextField.textColor = UIColor(red: 0.988, green: 0.435, blue: 0.176, alpha: 1.0)
-        usernameTextField.attributedPlaceholder = NSAttributedString(string: usernameTextField.placeholder!, attributes: [NSForegroundColorAttributeName: UIColor.whiteColor()])
+        usernameTextField.attributedPlaceholder = NSAttributedString(string: usernameTextField.placeholder!, attributes: [NSForegroundColorAttributeName: UIColor.white])
         usernameTextField.tintColor = UIColor(red: 0.0, green:0.502, blue:0.839, alpha: 1.0)
         
         /* Configure password textfield */
-        let passwordTextFieldPaddingViewFrame = CGRectMake(0.0, 0.0, 13.0, 0.0);
+        let passwordTextFieldPaddingViewFrame = CGRect(x: 0.0, y: 0.0, width: 13.0, height: 0.0);
         let passwordTextFieldPaddingView = UIView(frame: passwordTextFieldPaddingViewFrame)
         passwordTextField.leftView = passwordTextFieldPaddingView
-        passwordTextField.leftViewMode = .Always
+        passwordTextField.leftViewMode = .always
         passwordTextField.font = UIFont(name: "Roboto-Medium", size: 17.0)
         passwordTextField.backgroundColor = UIColor(red: 0.980, green: 0.769, blue: 0.608, alpha:1.0)
         passwordTextField.textColor = UIColor(red: 0.988, green: 0.435, blue: 0.176, alpha: 1.0)
-        passwordTextField.attributedPlaceholder = NSAttributedString(string: passwordTextField.placeholder!, attributes: [NSForegroundColorAttributeName: UIColor.whiteColor()])
+        passwordTextField.attributedPlaceholder = NSAttributedString(string: passwordTextField.placeholder!, attributes: [NSForegroundColorAttributeName: UIColor.white])
         passwordTextField.tintColor = UIColor(red: 0.0, green:0.502, blue:0.839, alpha: 1.0)
         
         /* Configure header text label */
         headerTextLabel.font = UIFont(name: "Roboto-Medium", size: 20)
-        headerTextLabel.textColor = UIColor.whiteColor()
+        headerTextLabel.textColor = UIColor.white
         
         /* Configure login button */
         loginButton.titleLabel?.font = UIFont(name: "Roboto-Medium", size: 17.0)
         loginButton.highlightedBackingColor = UIColor(red: 1.0, green: 0.514, blue: 0.349, alpha:1.0)
         loginButton.backingColor = UIColor(red: 0.941, green:0.337, blue:0.169, alpha: 1.0)
         loginButton.backgroundColor = UIColor(red: 0.941, green:0.337, blue:0.169, alpha: 1.0)
-        loginButton.setTitleColor(UIColor.whiteColor(), forState: .Normal)
+        loginButton.setTitleColor(UIColor.white, for: UIControlState())
         
         /* Configure signup button */
         signupButton.titleLabel?.font = UIFont(name: "Roboto-Medium", size: 17.0)
         
         /* Configure tap recognizer */
-        tapRecognizer = UITapGestureRecognizer(target: self, action: "handleSingleTap:")
+        tapRecognizer = UITapGestureRecognizer(target: self, action: #selector(LoginViewController.handleSingleTap(_:)))
         tapRecognizer?.numberOfTapsRequired = 1
         
     }
     
     // MARK: - helpers
     
-    func showAlertView(errorMessage: String?) {
+    func showAlertView(_ errorMessage: String?) {
        
-        let alertController = UIAlertController(title: nil, message: errorMessage!, preferredStyle: .Alert)
+        let alertController = UIAlertController(title: nil, message: errorMessage!, preferredStyle: .alert)
         
-        let cancelAction = UIAlertAction(title: "Dismiss", style: .Cancel) {(action) in
+        let cancelAction = UIAlertAction(title: "Dismiss", style: .cancel) {(action) in
           
         
         }
         alertController.addAction(cancelAction)
         
-        self.presentViewController(alertController, animated: true){
+        self.present(alertController, animated: true){
             
         }
 

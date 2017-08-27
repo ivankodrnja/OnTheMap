@@ -14,12 +14,12 @@ class TextFieldInset: UITextField {
     @IBInspectable var insetY: CGFloat = 0
     
     // placeholder position
-    override func textRectForBounds(bounds: CGRect) -> CGRect {
-        return CGRectInset(bounds , insetX , insetY)
+    override func textRect(forBounds bounds: CGRect) -> CGRect {
+        return bounds.insetBy(dx: insetX , dy: insetY)
     }
     
     // text position
-    override func editingRectForBounds(bounds: CGRect) -> CGRect {
-        return CGRectInset(bounds , insetX , insetY)
+    override func editingRect(forBounds bounds: CGRect) -> CGRect {
+        return bounds.insetBy(dx: insetX , dy: insetY)
     }
 }

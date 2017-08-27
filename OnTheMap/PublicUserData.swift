@@ -24,7 +24,7 @@ struct PublicUserData {
     }
     
     /* Helper: Given a dictionary, convert it a PublicUserData objects */
-    static func publicUserData(userData: [String : AnyObject]) -> [PublicUserData] {
+    static func publicUserData(_ userData: [String : AnyObject]) -> [PublicUserData] {
         
         var user = [PublicUserData]()
         

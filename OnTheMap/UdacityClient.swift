@@ -10,7 +10,7 @@ import Foundation
 
 class UdacityClient : NSObject {
     /* Shared Session */
-    var session: NSURLSession
+    var session: URLSession
     
     // students dictionary that will be used for showing data in the list viewcontroller and mapviewcontroller
     var publicUserData = [PublicUserData]()
@@ -19,16 +19,16 @@ class UdacityClient : NSObject {
     var userKey: String?
     
     override init() {
-        session = NSURLSession.sharedSession()
+        session = URLSession.shared
         super.init()
     }
  
     // MARK: - Helpers
     
     /* Helper: Substitute the key for the value that is contained within the method name */
-    class func subtituteKeyInMethod(method: String, key: String, value: String) -> String? {
-        if method.rangeOfString("{\(key)}") != nil {
-            return method.stringByReplacingOccurrencesOfString("{\(key)}", withString: value)
+    class func subtituteKeyInMethod(_ method: String, key: String, value: String) -> String? {
+        if method.range(of: "{\(key)}") != nil {
+            return method.replacingOccurrences(of: "{\(key)}", with: value)
         } else {
             return nil
         }

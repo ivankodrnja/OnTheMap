@@ -19,20 +19,20 @@ class ListViewController: UIViewController, UITableViewDelegate, UITableViewData
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
-        self.parentViewController?.navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Logout", style: .Plain, target: self, action: "logoutButtonTouchUp")
+        self.parent?.navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Logout", style: .plain, target: self, action: #selector(ListViewController.logoutButtonTouchUp))
         
         
-        let rightRefreshBarButtonItem: UIBarButtonItem = UIBarButtonItem(barButtonSystemItem: UIBarButtonSystemItem.Refresh, target: self, action: "refreshData")
-        let rightInformationPostingButtonItem: UIBarButtonItem = UIBarButtonItem(image: UIImage(named: "Pin Icon"), style: UIBarButtonItemStyle.Plain, target: self, action: "postInformation")
+        let rightRefreshBarButtonItem: UIBarButtonItem = UIBarButtonItem(barButtonSystemItem: UIBarButtonSystemItem.refresh, target: self, action: #selector(ListViewController.refreshData))
+        let rightInformationPostingButtonItem: UIBarButtonItem = UIBarButtonItem(image: UIImage(named: "Pin Icon"), style: UIBarButtonItemStyle.plain, target: self, action: #selector(ListViewController.postInformation))
         
-        self.parentViewController?.navigationItem.setRightBarButtonItems([rightRefreshBarButtonItem, rightInformationPostingButtonItem], animated: true)
+        self.parent?.navigationItem.setRightBarButtonItems([rightRefreshBarButtonItem, rightInformationPostingButtonItem], animated: true)
         
         activityIndicator.hidesWhenStopped = true
         activityIndicator.stopAnimating()
     }
 
     
-    override func viewWillAppear(animated: Bool) {
+    override func viewWillAppear(_ animated: Bool) {
         
         
     }
@@ -43,8 +43,8 @@ class ListViewController: UIViewController, UITableViewDelegate, UITableViewData
     }
     
     
-    func displayError(errorString: String?) {
-        dispatch_async(dispatch_get_main_queue(), {
+    func displayError(_ errorString: String?) {
+        DispatchQueue.main.async(execute: {
             self.activityIndicator.stopAnimating()
             if let errorString = errorString {
                 self.showAlertView(errorString)
@@ -61,7 +61,7 @@ class ListViewController: UIViewController, UITableViewDelegate, UITableViewData
             if success{
                 self.activityIndicator.stopAnimating()
                 
-                self.dismissViewControllerAnimated(true, completion: nil)
+                self.dismiss(animated: true, completion: nil)
             } else {
                 print(error)
             }
@@ -76,7 +76,7 @@ class ListViewController: UIViewController, UITableViewDelegate, UITableViewData
             // proceeed if we got result from Parse API with student locations (information)
             if error == nil {
                 ParseClient.sharedInstance().studentsDict = result!
-                dispatch_async(dispatch_get_main_queue()) {
+                DispatchQueue.main.async {
                     self.activityIndicator.stopAnimating()
                     self.studentsTableView.reloadData()
                 }
@@ -90,24 +90,24 @@ class ListViewController: UIViewController, UITableViewDelegate, UITableViewData
     }
     
     func postInformation(){
-        let controller = self.storyboard?.instantiateViewControllerWithIdentifier("InformationPostingViewController") as! InformationPostingViewController 
-            self.presentViewController(controller, animated: true, completion: nil)
+        let controller = self.storyboard?.instantiateViewController(withIdentifier: "InformationPostingViewController") as! InformationPostingViewController 
+            self.present(controller, animated: true, completion: nil)
             
         }
 
     // MARK: - helpers
 
-    func showAlertView(errorMessage: String?) {
+    func showAlertView(_ errorMessage: String?) {
 
-        let alertController = UIAlertController(title: nil, message: errorMessage!, preferredStyle: .Alert)
+        let alertController = UIAlertController(title: nil, message: errorMessage!, preferredStyle: .alert)
         
-        let cancelAction = UIAlertAction(title: "Dismiss", style: .Cancel) {(action) in
+        let cancelAction = UIAlertAction(title: "Dismiss", style: .cancel) {(action) in
             
             
         }
         alertController.addAction(cancelAction)
         
-        self.presentViewController(alertController, animated: true){
+        self.present(alertController, animated: true){
             
         }
         
@@ -115,14 +115,14 @@ class ListViewController: UIViewController, UITableViewDelegate, UITableViewData
     
     // MARK: - Table delegate methods
  
-    func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
         /* Get cell type */
         let cellReuseIdentifier = "StudentlistTableViewCell"
         let student = ParseClient.sharedInstance().studentsDict[indexPath.row]
         
         
-        let cell = tableView.dequeueReusableCellWithIdentifier(cellReuseIdentifier)! as UITableViewCell
+        let cell = tableView.dequeueReusableCell(withIdentifier: cellReuseIdentifier)! as UITableViewCell
         
         /* Set cell defaults */
         cell.textLabel!.text = student.firstName! + " " + student.lastName!
@@ -132,18 +132,18 @@ class ListViewController: UIViewController, UITableViewDelegate, UITableViewData
         
     }
     
-    func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return ParseClient.sharedInstance().studentsDict.count
     }
     
-    func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         
-        let app = UIApplication.sharedApplication()
-        app.openURL(NSURL(string: ParseClient.sharedInstance().studentsDict[indexPath.row].mediaUrl!)!)
+        let app = UIApplication.shared
+        app.openURL(URL(string: ParseClient.sharedInstance().studentsDict[indexPath.row].mediaUrl!)!)
         
     }
     
-    func tableView(tableView: UITableView, heightForRowAtIndexPath indexPath: NSIndexPath) -> CGFloat {
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return 60
     }
     

@@ -10,10 +10,10 @@ import Foundation
 
 class ParseClient : NSObject {
     /* Shared Session */
-    var session: NSURLSession
+    var session: URLSession
     
     override init() {
-        session = NSURLSession.sharedSession()
+        session = URLSession.shared
         super.init()
     }
     // students dictionary that will be used for showing data in the list viewcontroller and mapviewcontroller
@@ -21,7 +21,7 @@ class ParseClient : NSObject {
     
     
     /* Helper function: Given a dictionary of parameters, convert to a string for a url */
-    class func escapedParameters(parameters: [String : AnyObject]) -> String {
+    class func escapedParameters(_ parameters: [String : AnyObject]) -> String {
         
         var urlVars = [String]()
         
@@ -31,7 +31,7 @@ class ParseClient : NSObject {
             let stringValue = "\(value)"
             
             // Escape it
-            let escapedValue = stringValue.stringByAddingPercentEncodingWithAllowedCharacters(NSCharacterSet.URLQueryAllowedCharacterSet())
+            let escapedValue = stringValue.addingPercentEncoding(withAllowedCharacters: CharacterSet.urlQueryAllowed)
             
             // Append it
             
@@ -40,7 +40,7 @@ class ParseClient : NSObject {
             }
         }
         
-        return (!urlVars.isEmpty ? "?" : "") + urlVars.joinWithSeparator("&")
+        return (!urlVars.isEmpty ? "?" : "") + urlVars.joined(separator: "&")
     }
     
     // MARK: - Shared Instance

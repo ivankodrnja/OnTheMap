@@ -44,24 +44,24 @@ class InformationPostingViewController: UIViewController {
         activityIndicator.stopAnimating()
         
         /* Configure tap recognizer */
-        tapRecognizer = UITapGestureRecognizer(target: self, action: "handleSingleTap:")
+        tapRecognizer = UITapGestureRecognizer(target: self, action: #selector(InformationPostingViewController.handleSingleTap(_:)))
         tapRecognizer?.numberOfTapsRequired = 1
     }
     
-    override func viewWillAppear(animated: Bool) {
+    override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
-        self.submitButton.hidden = true
-        self.linkTextField.hidden = true
-        self.locationMapView.hidden = true
-        self.cancelWhiteButton.hidden = true
+        self.submitButton.isHidden = true
+        self.linkTextField.isHidden = true
+        self.locationMapView.isHidden = true
+        self.cancelWhiteButton.isHidden = true
         
         self.addKeyboardDismissRecognizer()
         self.subscribeToKeyboardNotifications()
         
     }
     
-    override func viewWillDisappear(animated: Bool) {
+    override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         
         self.removeKeyboardDismissRecognizer()
@@ -85,20 +85,20 @@ class InformationPostingViewController: UIViewController {
         self.view.removeGestureRecognizer(tapRecognizer!)
     }
     
-    func handleSingleTap(recognizer: UITapGestureRecognizer) {
+    func handleSingleTap(_ recognizer: UITapGestureRecognizer) {
         self.view.endEditing(true)
     }
     
     func subscribeToKeyboardNotifications() {
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: "keyboardWillShow:", name: UIKeyboardWillShowNotification, object: nil)
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: "keyboardWillHide:", name: UIKeyboardWillHideNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(InformationPostingViewController.keyboardWillShow(_:)), name: NSNotification.Name.UIKeyboardWillShow, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(InformationPostingViewController.keyboardWillHide(_:)), name: NSNotification.Name.UIKeyboardWillHide, object: nil)
     }
     
     func unsubscribeToKeyboardNotifications() {
-        NSNotificationCenter.defaultCenter().removeObserver(self, name: UIKeyboardWillShowNotification, object: nil)
+        NotificationCenter.default.removeObserver(self, name: NSNotification.Name.UIKeyboardWillShow, object: nil)
     }
     
-    func keyboardWillShow(notification: NSNotification) {
+    func keyboardWillShow(_ notification: Notification) {
         
         if keyboardAdjusted == false {
             lastKeyboardOffset = getKeyboardHeight(notification) / 2
@@ -107,7 +107,7 @@ class InformationPostingViewController: UIViewController {
         }
     }
     
-    func keyboardWillHide(notification: NSNotification) {
+    func keyboardWillHide(_ notification: Notification) {
         
         if keyboardAdjusted == true {
             self.view.superview?.frame.origin.y += lastKeyboardOffset
@@ -115,22 +115,22 @@ class InformationPostingViewController: UIViewController {
         }
     }
     
-    func getKeyboardHeight(notification: NSNotification) -> CGFloat {
+    func getKeyboardHeight(_ notification: Notification) -> CGFloat {
         let userInfo = notification.userInfo
         let keyboardSize = userInfo![UIKeyboardFrameEndUserInfoKey] as! NSValue // of CGRect
-        return keyboardSize.CGRectValue().height
+        return keyboardSize.cgRectValue.height
     }
     
     
     // MARK: - Actions
 
-    @IBAction func cancelAction(sender: AnyObject) {
-        self.dismissViewControllerAnimated(true, completion: nil)
+    @IBAction func cancelAction(_ sender: AnyObject) {
+        self.dismiss(animated: true, completion: nil)
         
     }
 
 
-    @IBAction func findOnTheMapAction(sender: AnyObject) {
+    @IBAction func findOnTheMapAction(_ sender: AnyObject) {
         
         activityIndicator.startAnimating()
         self.view.alpha = 0.5
@@ -145,15 +145,15 @@ class InformationPostingViewController: UIViewController {
             } else {
                 
                 // hide and show UI elements appropriately
-                self.findOnTheMapButton.hidden = true
-                self.findOnTheMapButton.enabled = false
-                self.locationTextField.hidden = true
-                self.topLabel.hidden = true
-                self.submitButton.hidden = false
-                self.linkTextField.hidden = false
-                self.locationMapView.hidden = false
-                self.cancelButton.hidden = false
-                self.cancelWhiteButton.hidden = false
+                self.findOnTheMapButton.isHidden = true
+                self.findOnTheMapButton.isEnabled = false
+                self.locationTextField.isHidden = true
+                self.topLabel.isHidden = true
+                self.submitButton.isHidden = false
+                self.linkTextField.isHidden = false
+                self.locationMapView.isHidden = false
+                self.cancelButton.isHidden = false
+                self.cancelWhiteButton.isHidden = false
                 
                 self.view.alpha = 1.0
                 
@@ -174,7 +174,7 @@ class InformationPostingViewController: UIViewController {
                 // construct the visible area of the map based on the lat/lon
                 let region = MKCoordinateRegionMakeWithDistance(coordinate, 100000, 100000)
                 
-                dispatch_async(dispatch_get_main_queue()) {
+                DispatchQueue.main.async {
                     self.activityIndicator.stopAnimating()
                     
                     self.locationMapView.addAnnotation(annotation)
@@ -186,11 +186,11 @@ class InformationPostingViewController: UIViewController {
         }
     }
     
-    @IBAction func submitAction(sender: AnyObject) {
+    @IBAction func submitAction(_ sender: AnyObject) {
         
         self.activityIndicator.startAnimating()
         self.view.alpha = 0.5
-        self.findOnTheMapButton.enabled = false
+        self.findOnTheMapButton.isEnabled = false
         
         // check if the link text field is empty
         if self.linkTextField.text!.isEmpty {
@@ -200,7 +200,7 @@ class InformationPostingViewController: UIViewController {
             if self.validateUrl(self.linkTextField.text!) {
             
                 // prevent the user for submitting twice
-                self.submitButton.enabled = false
+                self.submitButton.isEnabled = false
                 
                 // get public user data using the user key (we need first_name and last_name)
                 UdacityClient.sharedInstance().getPublicUserData(UdacityClient.sharedInstance().userKey!) { (success, error) in
@@ -222,16 +222,16 @@ class InformationPostingViewController: UIViewController {
                         ParseClient.sharedInstance().postStudentLocation(tempKey!, firstName: tempFirstName!, lastName: tempLastName!, mapString: self.locationTextField.text!, mediaURL: self.linkTextField.text!, latitude: self.latitude!, longitude: self.longitude!)  { (success, error) in
                             // student location has been posted
                             if success {
-                                dispatch_async(dispatch_get_main_queue(), {
-                                self.dismissViewControllerAnimated(true, completion: nil)
+                                DispatchQueue.main.async(execute: {
+                                self.dismiss(animated: true, completion: nil)
                                 self.activityIndicator.stopAnimating()
                                 self.view.alpha = 1.0
                                 })
 
                             } else {
                                 self.displayError(error?.localizedDescription)
-                                dispatch_async(dispatch_get_main_queue(), {
-                                    self.submitButton.enabled = true
+                                DispatchQueue.main.async(execute: {
+                                    self.submitButton.isEnabled = true
                                 })
                             }
                        
@@ -239,8 +239,8 @@ class InformationPostingViewController: UIViewController {
                         
                     } else {
                         self.displayError(error?.localizedDescription)
-                        dispatch_async(dispatch_get_main_queue(), {
-                            self.submitButton.enabled = true
+                        DispatchQueue.main.async(execute: {
+                            self.submitButton.isEnabled = true
                         })
 
                     }
@@ -258,24 +258,24 @@ class InformationPostingViewController: UIViewController {
     
     // MARK: - helpers
     
-    func showAlertView(errorMessage: String?) {
+    func showAlertView(_ errorMessage: String?) {
         
-        let alertController = UIAlertController(title: nil, message: errorMessage!, preferredStyle: .Alert)
+        let alertController = UIAlertController(title: nil, message: errorMessage!, preferredStyle: .alert)
         
-        let cancelAction = UIAlertAction(title: "Dismiss", style: .Cancel) {(action) in
+        let cancelAction = UIAlertAction(title: "Dismiss", style: .cancel) {(action) in
             
             
         }
         alertController.addAction(cancelAction)
         
-        self.presentViewController(alertController, animated: true){
+        self.present(alertController, animated: true){
             
         }
         
     }
     
-    func displayError(errorString: String?) {
-        dispatch_async(dispatch_get_main_queue(), {
+    func displayError(_ errorString: String?) {
+        DispatchQueue.main.async(execute: {
             self.activityIndicator.stopAnimating()
             self.view.alpha = 1.0
             if let errorString = errorString {
@@ -285,9 +285,9 @@ class InformationPostingViewController: UIViewController {
     }
     
     // REGEX for validating entered url
-    func validateUrl(url: String) -> Bool {
+    func validateUrl(_ url: String) -> Bool {
         let pattern = "^(https?:\\/\\/)([a-zA-Z0-9_\\-~]+\\.)+[a-zA-Z0-9_\\-~\\/\\.]+$"
-        if let _ = url.rangeOfString(pattern, options: .RegularExpressionSearch){
+        if let _ = url.range(of: pattern, options: .regularExpression){
             return true
         }
         return false

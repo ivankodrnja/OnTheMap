@@ -13,69 +13,67 @@ import MapKit
 extension ParseClient {
 
     
-    func getStudentLocations(locationsNumber: Int = 100, completionHandler: (result: [StudentInformation]?, error: NSError?) -> Void) {
+    func getStudentLocations(_ locationsNumber: Int = 100, completionHandlerForGetLocations: @escaping (_ result: [StudentInformation]?, _ error: NSError?) -> Void) {
         
         /* 1. Set the parameters */
         let methodParameters = [ParseClient.ParameterKeys.Limit: locationsNumber]
         
         /* 2. Build the URL */
-        let urlString = ParseClient.Constants.baseSecureUrl + ParseClient.escapedParameters(methodParameters)
-        let url = NSURL(string: urlString)!
+        let urlString = ParseClient.Constants.baseSecureUrl + ParseClient.escapedParameters(methodParameters as [String : AnyObject])
+        let url = URL(string: urlString)!
         
         /* 3. Configure the request */
-        let request = NSMutableURLRequest(URL: url)
+        let request = NSMutableURLRequest(url: url)
         request.addValue(ParseClient.Constants.ApplicationID, forHTTPHeaderField: "X-Parse-Application-Id")
         request.addValue(ParseClient.Constants.APIKey, forHTTPHeaderField: "X-Parse-REST-API-Key")
         
         /* 4. Make the request */
-        let task = session.dataTaskWithRequest(request) { data, response, error in
+        let task = session.dataTask(with: request as URLRequest) { (data, response, error) in
+            
+            func sendError(_ error: String) {
+                print(error)
+                let userInfo = [NSLocalizedDescriptionKey : error]
+                completionHandlerForGetLocations(nil, NSError(domain: "getStudentLocations", code: 1, userInfo: userInfo))
+            }
             
             /* GUARD: Was there an error? */
             guard (error == nil) else {
                 
-                completionHandler(result: nil, error: error)
-                print("There was an error with your request: \(error)")
+                sendError("There was an error with your request: \(error!)")
                 return
             }
             
             /* GUARD: Did we get a successful 2XX response? */
-            guard let statusCode = (response as? NSHTTPURLResponse)?.statusCode where statusCode >= 200 && statusCode <= 299 else {
-                if let response = response as? NSHTTPURLResponse {
-                    print("Your request returned an invalid response! Status code: \(response.statusCode)!")
-                } else if let response = response {
-                    print("Your request returned an invalid response! Response: \(response)!")
-                } else {
-                    print("Your request returned an invalid response!")
-                }
+            guard let statusCode = (response as? HTTPURLResponse)?.statusCode, statusCode >= 200 && statusCode <= 299 else {
+                sendError("Your request returned a status code other than 2xx!")
                 return
             }
             
             /* GUARD: Was there any data returned? */
             guard let data = data else {
-                print("No data was returned by the request!")
+                sendError("No data was returned by the request!")
                 return
             }
             
 
             /* 5. Parse the data */
-            let parsedResult: AnyObject!
+            let parsedResult: [String:AnyObject]
             do {
-                parsedResult = try NSJSONSerialization.JSONObjectWithData(data, options: NSJSONReadingOptions.AllowFragments) as! NSDictionary
+                parsedResult = try JSONSerialization.jsonObject(with: data, options: .allowFragments) as! [String:AnyObject]
             } catch {
-                parsedResult = nil
                 print("Could not parse the data as JSON: '\(data)'")
                 return
             }
             
             /* 6. Use the data! */
-            if let results = parsedResult.valueForKey(ParseClient.JSONResponseKeys.Results) as? [[String : AnyObject]] {
+            if let results = parsedResult[ParseClient.JSONResponseKeys.Results] as? [[String : AnyObject]] {
                 
                 let students = StudentInformation.studentsFromResults(results)
                 
-                completionHandler(result: students, error: nil)
+                completionHandlerForGetLocations(students, nil)
                 
             } else {
-                completionHandler(result: nil, error: NSError(domain: "Results from Parse", code: 0, userInfo: [NSLocalizedDescriptionKey: "Download (server) error occured. Please retry."]))
+                completionHandlerForGetLocations(nil, NSError(domain: "Results from Parse", code: 0, userInfo: [NSLocalizedDescriptionKey: "Download (server) error occured. Please retry."]))
             }
             
             
@@ -85,12 +83,12 @@ extension ParseClient {
     }
     
     
-    func createAnnotationsFromLocations(locations:[StudentInformation], completionHandler: (result: [MKPointAnnotation]?, error: NSError?) -> Void){
+    func createAnnotationsFromLocations(_ locations:[StudentInformation], completionHandler: (_ result: [MKPointAnnotation]?, _ error: NSError?) -> Void){
         
         
         if locations.isEmpty {
             
-            completionHandler(result: nil, error: NSError(domain: "AnnotationParsing", code: 0, userInfo: [NSLocalizedDescriptionKey: "Couldn't create annotations."]))
+            completionHandler(nil, NSError(domain: "AnnotationParsing", code: 0, userInfo: [NSLocalizedDescriptionKey: "Couldn't create annotations."]))
             
         } else {
 
@@ -122,75 +120,74 @@ extension ParseClient {
                 
             }
             
-            completionHandler(result: annotations, error: nil)
+            completionHandler(annotations, nil)
         }
     }
     
     
-    func postStudentLocation(key: String, firstName: String, lastName:String, mapString: String, mediaURL: String, latitude: CLLocationDegrees, longitude: CLLocationDegrees, completionHandler: (success: Bool, error: NSError?) -> Void) {
+    func postStudentLocation(_ key: String, firstName: String, lastName:String, mapString: String, mediaURL: String, latitude: CLLocationDegrees, longitude: CLLocationDegrees, completionHandlerForPostLocation: @escaping (_ success: Bool, _ error: NSError?) -> Void) {
         
         /* 1. Set the parameters */
         // will be set in the POST request
         
         /* 2. Build the URL */
         let urlString = ParseClient.Constants.baseSecureUrl
-        let url = NSURL(string: urlString)!
+        let url = URL(string: urlString)!
         
         /* 3. Configure the request */
-        let request = NSMutableURLRequest(URL: url)
-        request.HTTPMethod = "POST"
-        request.addValue("QrX47CA9cyuGewLdsL7o5Eb8iug6Em8ye0dnAbIr", forHTTPHeaderField: "X-Parse-Application-Id")
-        request.addValue("QuWThTdiRmTux3YaDseUSEpUKo7aBYM737yKd4gY", forHTTPHeaderField: "X-Parse-REST-API-Key")
+        let request = NSMutableURLRequest(url: url)
+        request.httpMethod = "POST"
+        request.addValue(ParseClient.Constants.ApplicationID, forHTTPHeaderField: "X-Parse-Application-Id")
+        request.addValue(ParseClient.Constants.APIKey, forHTTPHeaderField: "X-Parse-REST-API-Key")
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.HTTPBody = "{\"uniqueKey\": \"\(key)\", \"firstName\": \"\(firstName)\", \"lastName\": \"\(lastName)\",\"mapString\": \"\(mapString)\", \"mediaURL\": \"\(mediaURL)\",\"latitude\": \(latitude), \"longitude\": \(longitude)}".dataUsingEncoding(NSUTF8StringEncoding)
+        request.httpBody = "{\"uniqueKey\": \"\(key)\", \"firstName\": \"\(firstName)\", \"lastName\": \"\(lastName)\",\"mapString\": \"\(mapString)\", \"mediaURL\": \"\(mediaURL)\",\"latitude\": \(latitude), \"longitude\": \(longitude)}".data(using: String.Encoding.utf8)
 
         
         /* 4. Make the request */
-        let task = session.dataTaskWithRequest(request) { data, response, error in
+        let task = session.dataTask(with: request as URLRequest)  { (data, response, error) in
+            
+            
+            func sendError(_ error: String) {
+                print(error)
+                let userInfo = [NSLocalizedDescriptionKey : error]
+                completionHandlerForPostLocation(false, NSError(domain: "postStudentLocation", code: 1, userInfo: userInfo))
+            }
             
             /* GUARD: Was there an error? */
             guard (error == nil) else {
                 
-                completionHandler(success: false, error: error)
-                print("There was an error with your request: \(error)")
+                sendError("There was an error with your request: \(error!)")
                 return
             }
             
             /* GUARD: Did we get a successful 2XX response? */
-            guard let statusCode = (response as? NSHTTPURLResponse)?.statusCode where statusCode >= 200 && statusCode <= 299 else {
-                if let response = response as? NSHTTPURLResponse {
-                    print("Your request returned an invalid response! Status code: \(response.statusCode)!")
-                } else if let response = response {
-                    print("Your request returned an invalid response! Response: \(response)!")
-                } else {
-                    print("Your request returned an invalid response!")
-                }
+            guard let statusCode = (response as? HTTPURLResponse)?.statusCode, statusCode >= 200 && statusCode <= 299 else {
+                sendError("Your request returned a status code other than 2xx!")
                 return
             }
             
             /* GUARD: Was there any data returned? */
             guard let data = data else {
-                print("No data was returned by the request!")
+                sendError("No data was returned by the request!")
                 return
             }
 
             
             /* 5. Parse the data */
-            let parsedResult: AnyObject!
+            let parsedResult: [String:AnyObject]
             do {
-                parsedResult = try NSJSONSerialization.JSONObjectWithData(data, options: NSJSONReadingOptions.AllowFragments) as! NSDictionary
+                parsedResult = try JSONSerialization.jsonObject(with: data, options: .allowFragments) as! [String:AnyObject]
             } catch {
-                parsedResult = nil
                 print("Could not parse the data as JSON: '\(data)'")
                 return
             }
             
             /* 6. Use the data! */
-            if let _ = parsedResult.valueForKey(ParseClient.JSONResponseKeys.ObjID) as? String {
+            if let _ = parsedResult[ParseClient.JSONResponseKeys.ObjID] as? String {
                 
-                completionHandler(success: true, error: nil)
+                completionHandlerForPostLocation(true, nil)
             } else {
-                completionHandler(success: false, error: NSError(domain: "PostStudentLocation", code: 0, userInfo: [NSLocalizedDescriptionKey: "Post request failed. Try again later."]))
+                completionHandlerForPostLocation(false, NSError(domain: "PostStudentLocation", code: 0, userInfo: [NSLocalizedDescriptionKey: "Post request failed. Try again later."]))
             }
             
             
