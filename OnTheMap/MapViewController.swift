@@ -67,7 +67,7 @@ class MapViewController: UIViewController, MKMapViewDelegate {
                 
                 self.dismiss(animated: true, completion: nil)
             } else {
-                print(error)
+                print(error!)
             }
         }
         
