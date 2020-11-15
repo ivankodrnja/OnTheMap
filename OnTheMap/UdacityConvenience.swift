@@ -74,7 +74,7 @@ extension UdacityClient {
             /* 5. Parse the data */
             /* subset response data! As per the spec, first 5 character should be skipped */
             //let newData = data.subdata(in: Range(5, data.count - 5))
-            let range = Range(5..<data.count)
+            let range = 5..<data.count
             
             let newData = data.subdata(in: range)
             
@@ -163,7 +163,7 @@ extension UdacityClient {
             /* subset response data! As per the spec, first 5 character should be skipped */
             //let newData = data.subdata(with: NSMakeRange(5, data.count - 5))
             
-            let range = Range(5..<data.count)
+            let range = 5..<data.count
             
             let newData = data.subdata(in: range)
             
@@ -238,7 +238,7 @@ extension UdacityClient {
             /* subset response data! As per the spec, first 5 character should be skipped */
             //let newData = data.subdata(with: NSMakeRange(5, data.count - 5))
             
-            let range = Range(5..<data.count)
+            let range = 5..<data.count
             
             let newData = data.subdata(in: range)
             
