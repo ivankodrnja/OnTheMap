@@ -24,8 +24,8 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         // Do any additional setup after loading the view, typically from a nib.
         self.parent?.navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Logout", style: .plain, target: self, action: #selector(MapViewController.logoutButtonTouchUp))
         
-        let rightRefreshBarButtonItem: UIBarButtonItem = UIBarButtonItem(barButtonSystemItem: UIBarButtonSystemItem.refresh, target: self, action: #selector(MapViewController.getStudentLocations))
-        let rightInformationPostingButtonItem: UIBarButtonItem = UIBarButtonItem(image: UIImage(named: "Pin Icon"), style: UIBarButtonItemStyle.plain, target: self, action: #selector(MapViewController.postInformation))
+        let rightRefreshBarButtonItem: UIBarButtonItem = UIBarButtonItem(barButtonSystemItem: UIBarButtonItem.SystemItem.refresh, target: self, action: #selector(MapViewController.getStudentLocations))
+        let rightInformationPostingButtonItem: UIBarButtonItem = UIBarButtonItem(image: UIImage(named: "Pin Icon"), style: UIBarButtonItem.Style.plain, target: self, action: #selector(MapViewController.postInformation))
         
         self.parent?.navigationItem.setRightBarButtonItems([rightRefreshBarButtonItem, rightInformationPostingButtonItem], animated: true)
         
@@ -57,7 +57,7 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     
     
     
-    func logoutButtonTouchUp(){
+    @objc func logoutButtonTouchUp(){
         self.activityIndicator.startAnimating()
         
         UdacityClient.sharedInstance().logout(){ success, error in
@@ -74,7 +74,7 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         
     }
     
-    func getStudentLocations(){
+    @objc func getStudentLocations(){
         activityIndicator.startAnimating()
         
         // get locations
@@ -106,7 +106,7 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         }
     }
     
-    func postInformation(){
+    @objc func postInformation(){
         let controller = self.storyboard?.instantiateViewController(withIdentifier: "InformationPostingViewController") as! InformationPostingViewController 
         self.present(controller, animated: true, completion: nil)
         
@@ -146,7 +146,7 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         if pinView == nil {
             pinView = MKPinAnnotationView(annotation: annotation, reuseIdentifier: reuseId)
             pinView!.canShowCallout = true
-            pinView!.pinColor = .red
+            pinView!.pinTintColor = .red
             pinView!.rightCalloutAccessoryView = UIButton(type: .detailDisclosure)
         } else {
             pinView!.annotation = annotation

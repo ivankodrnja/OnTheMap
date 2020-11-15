@@ -70,20 +70,20 @@ class LoginViewController: UIViewController {
         self.view.removeGestureRecognizer(tapRecognizer!)
     }
     
-    func handleSingleTap(_ recognizer: UITapGestureRecognizer) {
+    @objc func handleSingleTap(_ recognizer: UITapGestureRecognizer) {
         self.view.endEditing(true)
     }
     
     func subscribeToKeyboardNotifications() {
-        NotificationCenter.default.addObserver(self, selector: #selector(LoginViewController.keyboardWillShow(_:)), name: NSNotification.Name.UIKeyboardWillShow, object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(LoginViewController.keyboardWillHide(_:)), name: NSNotification.Name.UIKeyboardWillHide, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(LoginViewController.keyboardWillShow(_:)), name: UIResponder.keyboardWillShowNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(LoginViewController.keyboardWillHide(_:)), name: UIResponder.keyboardWillHideNotification, object: nil)
     }
     
     func unsubscribeToKeyboardNotifications() {
-        NotificationCenter.default.removeObserver(self, name: NSNotification.Name.UIKeyboardWillShow, object: nil)
+        NotificationCenter.default.removeObserver(self, name: UIResponder.keyboardWillShowNotification, object: nil)
     }
     
-    func keyboardWillShow(_ notification: Notification) {
+    @objc func keyboardWillShow(_ notification: Notification) {
         
         if keyboardAdjusted == false {
             lastKeyboardOffset = getKeyboardHeight(notification) / 2
@@ -92,7 +92,7 @@ class LoginViewController: UIViewController {
         }
     }
     
-    func keyboardWillHide(_ notification: Notification) {
+    @objc func keyboardWillHide(_ notification: Notification) {
         
         if keyboardAdjusted == true {
             self.view.superview?.frame.origin.y += lastKeyboardOffset
@@ -102,7 +102,7 @@ class LoginViewController: UIViewController {
     
     func getKeyboardHeight(_ notification: Notification) -> CGFloat {
         let userInfo = notification.userInfo
-        let keyboardSize = userInfo![UIKeyboardFrameEndUserInfoKey] as! NSValue // of CGRect
+        let keyboardSize = userInfo![UIResponder.keyboardFrameEndUserInfoKey] as! NSValue // of CGRect
         return keyboardSize.cgRectValue.height
     }
     
@@ -183,7 +183,7 @@ class LoginViewController: UIViewController {
         usernameTextField.font = UIFont(name: "Roboto-Medium", size: 17.0)
         usernameTextField.backgroundColor = UIColor(red: 0.980, green: 0.769, blue: 0.608, alpha:1.0)
         usernameTextField.textColor = UIColor(red: 0.988, green: 0.435, blue: 0.176, alpha: 1.0)
-        usernameTextField.attributedPlaceholder = NSAttributedString(string: usernameTextField.placeholder!, attributes: [NSForegroundColorAttributeName: UIColor.white])
+        usernameTextField.attributedPlaceholder = NSAttributedString(string: usernameTextField.placeholder!, attributes: convertToOptionalNSAttributedStringKeyDictionary([convertFromNSAttributedStringKey(NSAttributedString.Key.foregroundColor): UIColor.white]))
         usernameTextField.tintColor = UIColor(red: 0.0, green:0.502, blue:0.839, alpha: 1.0)
         
         /* Configure password textfield */
@@ -194,7 +194,7 @@ class LoginViewController: UIViewController {
         passwordTextField.font = UIFont(name: "Roboto-Medium", size: 17.0)
         passwordTextField.backgroundColor = UIColor(red: 0.980, green: 0.769, blue: 0.608, alpha:1.0)
         passwordTextField.textColor = UIColor(red: 0.988, green: 0.435, blue: 0.176, alpha: 1.0)
-        passwordTextField.attributedPlaceholder = NSAttributedString(string: passwordTextField.placeholder!, attributes: [NSForegroundColorAttributeName: UIColor.white])
+        passwordTextField.attributedPlaceholder = NSAttributedString(string: passwordTextField.placeholder!, attributes: convertToOptionalNSAttributedStringKeyDictionary([convertFromNSAttributedStringKey(NSAttributedString.Key.foregroundColor): UIColor.white]))
         passwordTextField.tintColor = UIColor(red: 0.0, green:0.502, blue:0.839, alpha: 1.0)
         
         /* Configure header text label */
@@ -206,7 +206,7 @@ class LoginViewController: UIViewController {
         loginButton.highlightedBackingColor = UIColor(red: 1.0, green: 0.514, blue: 0.349, alpha:1.0)
         loginButton.backingColor = UIColor(red: 0.941, green:0.337, blue:0.169, alpha: 1.0)
         loginButton.backgroundColor = UIColor(red: 0.941, green:0.337, blue:0.169, alpha: 1.0)
-        loginButton.setTitleColor(UIColor.white, for: UIControlState())
+        loginButton.setTitleColor(UIColor.white, for: UIControl.State())
         
         /* Configure signup button */
         signupButton.titleLabel?.font = UIFont(name: "Roboto-Medium", size: 17.0)
@@ -234,4 +234,15 @@ class LoginViewController: UIViewController {
         }
 
     }
+}
+
+// Helper function inserted by Swift 4.2 migrator.
+fileprivate func convertToOptionalNSAttributedStringKeyDictionary(_ input: [String: Any]?) -> [NSAttributedString.Key: Any]? {
+	guard let input = input else { return nil }
+	return Dictionary(uniqueKeysWithValues: input.map { key, value in (NSAttributedString.Key(rawValue: key), value)})
+}
+
+// Helper function inserted by Swift 4.2 migrator.
+fileprivate func convertFromNSAttributedStringKey(_ input: NSAttributedString.Key) -> String {
+	return input.rawValue
 }

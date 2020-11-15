@@ -22,8 +22,8 @@ class ListViewController: UIViewController, UITableViewDelegate, UITableViewData
         self.parent?.navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Logout", style: .plain, target: self, action: #selector(ListViewController.logoutButtonTouchUp))
         
         
-        let rightRefreshBarButtonItem: UIBarButtonItem = UIBarButtonItem(barButtonSystemItem: UIBarButtonSystemItem.refresh, target: self, action: #selector(ListViewController.refreshData))
-        let rightInformationPostingButtonItem: UIBarButtonItem = UIBarButtonItem(image: UIImage(named: "Pin Icon"), style: UIBarButtonItemStyle.plain, target: self, action: #selector(ListViewController.postInformation))
+        let rightRefreshBarButtonItem: UIBarButtonItem = UIBarButtonItem(barButtonSystemItem: UIBarButtonItem.SystemItem.refresh, target: self, action: #selector(ListViewController.refreshData))
+        let rightInformationPostingButtonItem: UIBarButtonItem = UIBarButtonItem(image: UIImage(named: "Pin Icon"), style: UIBarButtonItem.Style.plain, target: self, action: #selector(ListViewController.postInformation))
         
         self.parent?.navigationItem.setRightBarButtonItems([rightRefreshBarButtonItem, rightInformationPostingButtonItem], animated: true)
         
@@ -53,7 +53,7 @@ class ListViewController: UIViewController, UITableViewDelegate, UITableViewData
     }
     
 
-    func logoutButtonTouchUp(){
+    @objc func logoutButtonTouchUp(){
         self.activityIndicator.startAnimating()
         
         UdacityClient.sharedInstance().logout(){ success, error in
@@ -69,7 +69,7 @@ class ListViewController: UIViewController, UITableViewDelegate, UITableViewData
         
     }
     
-    func refreshData(){
+    @objc func refreshData(){
         self.activityIndicator.startAnimating()
         // get locations
         ParseClient.sharedInstance().getStudentLocations(){(result, error) in
@@ -89,7 +89,7 @@ class ListViewController: UIViewController, UITableViewDelegate, UITableViewData
         }
     }
     
-    func postInformation(){
+    @objc func postInformation(){
         let controller = self.storyboard?.instantiateViewController(withIdentifier: "InformationPostingViewController") as! InformationPostingViewController 
             self.present(controller, animated: true, completion: nil)
             
