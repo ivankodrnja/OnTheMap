@@ -3,7 +3,7 @@
 //  OnTheMap
 //
 //  Created by Ivan Kodrnja on 19/07/15.
-//  Copyright (c) 2015 Ivan Kodrnja. All rights reserved.
+//  Copyright (c) 2015-2021 Ivan Kodrnja. All rights reserved.
 //
 
 import UIKit
